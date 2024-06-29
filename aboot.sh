@@ -9,9 +9,9 @@ SETUPCOMPLETE="/var/log/setupcomplete.log"
 if [[ ! -f $SETUPCOMPLETE ]]; then
 	#FirstRun
 	export PROMPT_COMMAND='echo -n "hostname $(date +'%y-%m-%d-%H:%M:%S:%N') "'
-    sudo apt-get remove --purge man-db
+    	sudo apt-get remove --purge man-db
 	sudo apt-get update && sudo apt-get install nmap -y
-	sudo apt-get update && sudo apt-get install google-cloud-cli -y
+	#sudo apt-get update && sudo apt-get install google-cloud-cli -y
 	sudo apt-get update && sudo apt-get install netcat -y
 	sudo apt-get update && sudo apt-get install hydra -y
 	sudo apt-get update && sudo apt-get install net-tools -y
