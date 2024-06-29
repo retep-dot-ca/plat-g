@@ -8,7 +8,7 @@ exec 1>>log.txt 2>&1
 SETUPCOMPLETE="/var/log/setupcomplete.log"
 if [[ ! -f $SETUPCOMPLETE ]]; then
 	#FirstRun
-	export PROMPT_COMMAND='echo -n "hostname $(date +'%y-%m-%d-%H:%M:%S:%N') "'
+	export PROMPT_COMMAND='echo -n "hostname $(date +'%y-%m-%d-%H:%M:%S:%N')"'
     	sudo apt-get remove --purge man-db -y
 	sudo apt-get update && sudo apt-get install nmap -y
 	#sudo apt-get update && sudo apt-get install google-cloud-cli -y
@@ -36,9 +36,10 @@ if [[ ! -f $SETUPCOMPLETE ]]; then
 
 #the next line creates an empty file so it won't run the next boot
    sudo touch "$SETUPCOMPLETE"
+   
 	cp log.txt /var/log/gcp-fr.log
-	gcloud storage cp /var/log/gcp.log gs://plat-g-data-store/logging/"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt &>> /var/log/gcloud.txt
-	mv /var/log/gcp-fr.log /var/log/gcp-$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt 
+	gcloud storage cp /var/log/gcp-fr.log gs://plat-g-data-store/logging/"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt &>> /var/log/gcloud.txt
+	mv /var/log/gcp-fr.log /var/log/fr-gcp-"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt 
  	#shutdown
 else
    echo "Second Run"
@@ -75,7 +76,7 @@ echo "stop test 9" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 cp log.txt /var/log/gcp.log
 gcloud storage cp /var/log/gcp.log gs://plat-g-data-store/logging/"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt &>> /var/log/gcloud.txt
-mv /var/log/gcp.log /var/log/gcp-$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt 
+mv /var/log/gcp.log /var/log/gcp-"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt 
 #shutdown
 
 fi
