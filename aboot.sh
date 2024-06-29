@@ -37,6 +37,7 @@ if [[ ! -f $SETUPCOMPLETE ]]; then
    sudo touch "$SETUPCOMPLETE"
 
 	gcloud storage cp log.txt gs://plat-g-data/"$HOSTNAME $(date +%y-%m-%d-%H:%M:%S:%N)".txt
+ 	sleep 240
  	shutdown
 else
    echo "Second Run"
@@ -72,7 +73,7 @@ exec "$@"
 echo "stop test 9" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 gcloud storage cp log.txt gs://plat-g-data/"$HOSTNAME $(date +%y-%m-%d-%H:%M:%S:%N)".txt
-
+sleep 240
 shutdown
 
 fi
