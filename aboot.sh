@@ -59,7 +59,7 @@ echo "stop test 4" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 #5 Calling large numbers of large domains to simulate tunneling via DNS
 echo "start test 5" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
-dig -f ./usr/share/wordlists/dns-exfil.txt  > /dev/null &
+dig -f /usr/share/wordlists/dns-exfil.txt  > /dev/null &
 echo "stop test 5" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 
