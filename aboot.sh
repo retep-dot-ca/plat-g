@@ -3,7 +3,7 @@
 
 exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
-exec 1>>log.txt 2>&1
+exec 1>>/var/log/startlog.txt 2>&1
 
 SETUPCOMPLETE="/var/log/setupcomplete.log"
 if [[ ! -f $SETUPCOMPLETE ]]; then
@@ -36,7 +36,7 @@ if [[ ! -f $SETUPCOMPLETE ]]; then
 #the next line creates an empty file so it won't run the next boot
    sudo touch "$SETUPCOMPLETE"
 
-	gcloud storage cp log.txt gs://plat-g-data-store/"$HOSTNAME $(date +%y-%m-%d-%H:%M:%S:%N)".txt
+	gcloud storage cp /var/log/startlog.txt gs://plat-g-data-store/"$HOSTNAME $(date +%y-%m-%d-%H:%M:%S:%N)".txt
  	#shutdown
 else
    echo "Second Run"
