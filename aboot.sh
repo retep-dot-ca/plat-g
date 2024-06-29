@@ -123,6 +123,6 @@ mv /var/log/gcp.log /var/log/gcp-"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt
 
 sleep 180
 
-shutdown
+#shutdown
 
 fi
