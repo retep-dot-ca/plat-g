@@ -12,7 +12,7 @@ if [[ ! -f $SETUPCOMPLETE ]]; then
    sudo apt-get remove --purge man-db -y
    curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
    sudo bash add-google-cloud-ops-agent-repo.sh --also-install
-   useradd -p "$(openssl passwd -6 gplatadmintestingpassword)" userattack
+   sudo useradd -p "$(openssl passwd -6 gplatadmintestingpassword)" userattack
    sudo sed -i "/^[^#]*PasswordAuthentication[[:space:]]no/c\PasswordAuthentication yes" /etc/ssh/sshd_config
    sudo service sshd restart
    
