@@ -25,7 +25,7 @@ else
    netcat -lp 3389 &
    netcat -lp 21 &
 
-   sleep 360
+   sleep 600
 
    shutdown
 fi
