@@ -25,4 +25,7 @@ else
    netcat -lp 3389 </dev/null >/dev/null 2>&1
    netcat -lp 21 </dev/null >/dev/null 2>&1
 
+   sleep 180
+
+   shutdown
 fi
