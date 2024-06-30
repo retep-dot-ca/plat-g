@@ -47,7 +47,7 @@ else
 sleep 180
 # 1 - AWS simulate internal recon and attempted lateral movement #google cannnot detect
 echo "start test 1" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
-sudo nmap -sT 10.1.1.0/24
+sudo nmap -sT 10.1.1.3/
 echo "stop test 1" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 3 SSH - Google says 
