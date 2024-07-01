@@ -8,10 +8,10 @@ exec 1>>log.out 2>&1
 SETUPCOMPLETE="/var/log/setupcomplete.log"
 if [[ ! -f $SETUPCOMPLETE ]]; then
    #FirstRun
-   sudo apt-get update && sudo apt-get install netcat -y
    sudo apt-get remove --purge man-db -y
-   curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
-   sudo bash add-google-cloud-ops-agent-repo.sh --also-install
+   sudo apt-get update && sudo apt-get install netcat -y
+   # curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
+   # sudo bash add-google-cloud-ops-agent-repo.sh --also-install
    sudo useradd -p "$(openssl passwd -6 gplatadmintestingpassword)" userattack
    sudo sed -i "/^[^#]*PasswordAuthentication[[:space:]]no/c\PasswordAuthentication yes" /etc/ssh/sshd_config
    sudo service sshd restart
