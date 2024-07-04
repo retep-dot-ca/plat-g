@@ -40,14 +40,12 @@ metrics:
       default_pipeline:
         receivers: [hostmetrics]
         processors: [metrics_filter]' >> /etc/google-cloud-ops-agent/config.yaml
-    sudo systemctl restart google-cloud-ops-agent"*"
-   #the next line creates an empty file so it won't run the next boot
+   sudo systemctl restart google-cloud-ops-agent"*"
    touch "$SETUPCOMPLETE"
    shutdown
    
 else
    echo "Second Run"
-   sleep 900
-
+   sleep 1800
    shutdown
 fi
