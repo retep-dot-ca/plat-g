@@ -166,7 +166,7 @@ cp log.txt /var/log/gcp.log
 gcloud storage cp /var/log/gcp.log gs://plat-g-data-store/logging/"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt &>> /var/log/gcloud.txt
 mv /var/log/gcp.log /var/log/gcp-"$HOSTNAME-$(date +%y-%m-%d-%H:%M:%S:%N)".txt 
 
-sleep 180
+sleep 30
 
 #Cleanup time
 gcloud compute firewall-rules delete allowssh-$HOSTNAME -q --project=plat-g-w-sccp
@@ -174,7 +174,7 @@ gcloud compute firewall-rules delete allowrdp-$HOSTNAME -q --project=plat-g-w-sc
 gcloud compute firewall-rules delete allowssh-$HOSTNAME -q --project=plat-g-wo-sccp
 gcloud compute firewall-rules delete allowrdp-$HOSTNAME -q --project=plat-g-wo-sccp
 
-sleep 180
+sleep 30
 shutdown
 
 fi
