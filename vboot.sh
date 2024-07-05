@@ -46,6 +46,6 @@ metrics:
    
 else
    echo "Second Run"
-   sleep 1800
+   sleep 900
    shutdown
 fi
