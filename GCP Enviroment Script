@@ -1,0 +1,455 @@
+###
+# 
+# This is a copy of most of the gcloud commands used to generate the projects, and 'cloud infrastrucutre' required to generate the testing enviroment - there may have been a few changes in the GUI but the goal is to create the enviorment from code as much as possible. 
+# A future goal will be to change this to a bash script to allow variables to be used to better generate a unique script per enviroment. 
+# This script is provided as-is and may have unintended errors - some accounts are overprivilleged and overscoped and in future versions will be scoped down to what is needing to be tested as this tool is futher developed.
+###
+
+gcloud projects create plat-g-wo-sccp
+gcloud projects create plat-g-w-sccp
+gcloud projects create plat-g-data
+
+## Centralized Bucket Storage
+gcloud storage buckets create gs://plat-g-data --location=US --project=plat-g-wo-sccp
+gcloud storage buckets update gs://plat-g-data --clear-soft-delete --project=plat-g-data
+
+gcloud storage buckets create gs://gplat-wo-sccp-europe-west10 --location=europe-west10 --project=plat-g-wo-sccp
+gcloud storage buckets create gs://gplat-wo-sccp-africa-south1 --location=africa-south1 --project=plat-g-wo-sccp
+gcloud storage buckets create gs://gplat-wo-sccp-us-east1 --location=us-east1 --project=plat-g-wo-sccp
+gcloud storage buckets create gs://gplat-wo-sccp-us-central1 --location=us-central1 --project=plat-g-wo-sccp
+gcloud storage buckets create gs://gplat-w-sccp-us-central1 --location=us-central1 --project=plat-g-w-sccp
+gcloud storage buckets create gs://gplat-w-sccp-europe-west10 --location=europe-west10 --project=plat-g-w-sccp
+gcloud storage buckets create gs://gplat-w-sccp-africa-south1 --location=africa-south1 --project=plat-g-w-sccp
+gcloud storage buckets create gs://gplat-w-sccp-us-east1 --location=us-east1 --project=plat-g-w-sccp
+
+#Lets disable soft delete as adds additional cost and is not expected to be used
+gcloud storage buckets update gs://gplat-wo-sccp-europe-west10 --clear-soft-delete --project=plat-g-wo-sccp
+gcloud storage buckets update gs://gplat-wo-sccp-africa-south1 --clear-soft-delete --project=plat-g-wo-sccp
+gcloud storage buckets update gs://gplat-wo-sccp-us-east1 --clear-soft-delete --project=plat-g-wo-sccp
+gcloud storage buckets update gs://gplat-wo-sccp-us-central1 --clear-soft-delete --project=plat-g-wo-sccp
+gcloud storage buckets update gs://gplat-w-sccp-us-central1 --clear-soft-delete --project=plat-g-w-sccp
+gcloud storage buckets update gs://gplat-w-sccp-europe-west10 --clear-soft-delete --project=plat-g-w-sccp
+gcloud storage buckets update gs://gplat-w-sccp-africa-south1 --clear-soft-delete --project=plat-g-w-sccp
+gcloud storage buckets update gs://gplat-w-sccp-us-east1 --clear-soft-delete --project=plat-g-w-sccp
+
+### to Run ###
+gcloud services enable compute.googleapis.com --project=plat-g-wo-sccp
+gcloud services enable compute.googleapis.com --project=plat-g-w-sccp
+gcloud services enable dns.googleapis.com --project=plat-g-w-sccp
+gcloud services enable dns.googleapis.com --project=plat-g-wo-sccp
+
+###### Lets get some SA's going #####
+gcloud iam service-accounts create gplatsa \
+--description="Service Account for GPLAT" \
+--display-name="gplatsa" \
+--project=plat-g-w-sccp
+gcloud iam service-accounts create gplatsa \
+--description="Service Account for GPLAT" \
+--display-name="gplatsa" \
+--project=plat-g-wo-sccp
+
+### Gcloud Bindings
+gcloud projects add-iam-policy-binding plat-g-wo-sccp \
+--member='serviceAccount:service-530671968079@compute-system.iam.gserviceaccount.com' \
+--role='roles/compute.instanceAdmin.v1'
+gcloud projects add-iam-policy-binding plat-g-w-sccp \
+--member='serviceAccount:service-289892821383@compute-system.iam.gserviceaccount.com' \
+--role='roles/compute.instanceAdmin.v1'
+
+### Generate some networks
+gcloud compute networks create plat-g-wo-sccp-europe-west10 \
+--subnet-mode=custom \
+--project=plat-g-wo-sccp
+gcloud compute networks create plat-g-wo-sccp-africa-south1 \
+--subnet-mode=custom \
+--project=plat-g-wo-sccp
+gcloud compute networks create plat-g-wo-sccp-us-east1 \
+--subnet-mode=custom \
+--project=plat-g-wo-sccp
+gcloud compute networks create plat-g-wo-sccp-us-central1 \
+--subnet-mode=custom \
+--project=plat-g-wo-sccp
+gcloud compute networks create plat-g-w-sccp-europe-west10 \
+--subnet-mode=custom \
+--project=plat-g-w-sccp
+gcloud compute networks create plat-g-w-sccp-africa-south1 \
+--subnet-mode=custom \
+--project=plat-g-w-sccp
+gcloud compute networks create plat-g-w-sccp-us-east1 \
+--subnet-mode=custom \
+--project=plat-g-w-sccp
+gcloud compute networks create plat-g-w-sccp-us-central1 \
+--subnet-mode=custom \
+--project=plat-g-w-sccp
+
+## Lets get some subnets going
+#create unique subnests
+gcloud compute networks subnets create default \
+--network=plat-g-wo-sccp-europe-west10 \
+--range=10.1.1.0/24 \
+--region=europe-west10 \
+--stack-type=IPV4_ONLY \
+--project=plat-g-wo-sccp
+gcloud compute networks subnets create default \
+--network=plat-g-wo-sccp-africa-south1 \
+--range=10.1.1.0/24 \
+--region=africa-south1 \
+--stack-type=IPV4_ONLY \
+--project=plat-g-wo-sccp
+gcloud compute networks subnets create default \
+--network=plat-g-wo-sccp-us-east1 \
+--range=10.1.1.0/24 \
+--region=us-east1 \
+--stack-type=IPV4_ONLY \
+--project=plat-g-wo-sccp
+gcloud compute networks subnets create default \
+--network=plat-g-wo-sccp-us-central1 \
+--range=10.1.1.0/24 \
+--region=us-central1 \
+--stack-type=IPV4_ONLY \
+--project=plat-g-wo-sccp
+
+gcloud compute networks subnets create default \
+--network=plat-g-w-sccp-europe-west10 \
+--range=10.1.1.0/24 \
+--region=europe-west10 \
+--stack-type=IPV4_ONLY \
+--project=plat-g-w-sccp
+gcloud compute networks subnets create default \
+--network=plat-g-w-sccp-africa-south1 \
+--range=10.1.1.0/24 \
+--region=africa-south1 \
+--stack-type=IPV4_ONLY \
+--project=plat-g-w-sccp
+gcloud compute networks subnets create default \
+--network=plat-g-w-sccp-us-east1 \
+--range=10.1.1.0/24 \
+--region=us-east1 \
+--stack-type=IPV4_ONLY \
+--project=plat-g-w-sccp
+gcloud compute networks subnets create default \
+--network=plat-g-w-sccp-us-central1 \
+--range=10.1.1.0/24 \
+--region=us-central1 \
+--stack-type=IPV4_ONLY \
+--project=plat-g-w-sccp
+
+#Generate the instacne templates to standardiz the VM creation
+
+gcloud compute instance-templates create attack-sim-africa-south1-it \
+--machine-type=e2-standard-2 \
+--image-family=debian-11 \
+--image-project=debian-cloud \
+--boot-disk-size=10GB \
+--network-interface=network=plat-g-w-sccp-africa-south1,subnet=default,private-network-ip=10.1.1.2/24 \
+--metadata=startup-script-url=gs://plat-g-data/aboot.txt \
+--service-account=gplatsa@plat-g-w-sccp.iam.gserviceaccount.com \
+--region=africa-south1 \
+--source-instance-zone=africa-south1 \
+--project=plat-g-w-sccp \
+--tags=attack,internet
+gcloud compute instance-templates create vic-sim-africa-south1-it \
+--machine-type=e2-standard-2 \
+--image-family=debian-11 \
+--image-project=debian-cloud \
+--boot-disk-size=10GB \
+--network-interface=network=plat-g-w-sccp-africa-south1,subnet=default,private-network-ip=10.1.1.3/24,address=none \
+--metadata=startup-script-url=gs://plat-g-data/vboot.txt \
+--service-account=gplatsa@plat-g-w-sccp.iam.gserviceaccount.com \
+--region=africa-south1 \
+--source-instance-zone=africa-south1 \
+--project=plat-g-w-sccp \
+--tags=nointernet
+gcloud compute instance-templates create attack-sim-africa-south1-it \
+--machine-type=e2-standard-2 \
+--image-family=debian-11 \
+--image-project=debian-cloud \
+--boot-disk-size=10GB \
+--network-interface=network=plat-g-wo-sccp-africa-south1,subnet=default,private-network-ip=10.1.1.2/24 \
+--metadata=startup-script-url=gs://plat-g-data/vboot.txt \
+--service-account=gplatsa@plat-g-wo-sccp.iam.gserviceaccount.com \
+--region=africa-south1 \
+--source-instance-zone=africa-south1 \
+--project=plat-g-wo-sccp \
+--tags=attack,internet
+gcloud compute instance-templates create vic-sim-africa-south1-it \
+--machine-type=e2-standard-2 \
+--image-family=debian-11 \
+--image-project=debian-cloud \
+--boot-disk-size=10GB \
+--network-interface=network=plat-g-wo-sccp-africa-south1,subnet=default,private-network-ip=10.1.1.3/24,address=none \
+--metadata=startup-script-url=gs://plat-g-data/vboot.txt \
+--service-account=gplatsa@plat-g-wo-sccp.iam.gserviceaccount.com \
+--region=africa-south1 \
+--source-instance-zone=africa-south1 \
+--project=plat-g-wo-sccp \
+--tags=nointernet   
+gcloud compute instance-templates create attack-sim-europe-west10-it \
+--machine-type=e2-standard-2 \
+--image-family=debian-11 \
+--image-project=debian-cloud \
+--boot-disk-size=10GB \
+--network-interface=network=plat-g-w-sccp-europe-west10,subnet=default,private-network-ip=10.1.1.2/24 \
+--metadata=startup-script-url=gs://plat-g-data/aboot.txt \
+--service-account=gplatsa@plat-g-w-sccp.iam.gserviceaccount.com \
+--region=europe-west10 \
+--source-instance-zone=europe-west10 \
+--project=plat-g-w-sccp \
+--tags=attack,internet
+gcloud compute instance-templates create vic-sim-europe-west10-it \
+--machine-type=e2-standard-2 \
+--image-family=debian-11 \
+--image-project=debian-cloud \
+--boot-disk-size=10GB \
+--network-interface=network=plat-g-w-sccp-europe-west10,subnet=default,private-network-ip=10.1.1.3/24,address=none \
+--metadata=startup-script-url=gs://plat-g-data/vboot.txt \
+--service-account=gplatsa@plat-g-w-sccp.iam.gserviceaccount.com \
+--region=europe-west10 \
+--source-instance-zone=europe-west10 \
+--project=plat-g-w-sccp \
+--tags=nointernet
+gcloud compute instance-templates create attack-sim-europe-west10-it \
+--machine-type=e2-standard-2 \
+--image-family=debian-11 \
+--image-project=debian-cloud \
+--boot-disk-size=10GB \
+--network-interface=network=plat-g-wo-sccp-europe-west10,subnet=default,private-network-ip=10.1.1.2/24 \
+--metadata=startup-script-url=gs://plat-g-data/aboot.txt \
+--service-account=gplatsa@plat-g-wo-sccp.iam.gserviceaccount.com \
+--region=europe-west10 \
+--source-instance-zone=europe-west10 \
+--project=plat-g-wo-sccp \
+--tags=attack,internet
+gcloud compute instance-templates create vic-sim-europe-west10-it \
+--machine-type=e2-standard-2 \
+--image-family=debian-11 \
+--image-project=debian-cloud \
+--boot-disk-size=10GB \
+--network-interface=network=plat-g-wo-sccp-europe-west10,subnet=default,private-network-ip=10.1.2.3/24,address=none \
+--metadata=startup-script-url=gs://plat-g-data/vboot.txt \
+--service-account=gplatsa@plat-g-wo-sccp.iam.gserviceaccount.com \
+--region=europe-west10 \
+--source-instance-zone=europe-west10 \
+--project=plat-g-wo-sccp \
+--tags=nointernet 
+gcloud compute instance-templates create attack-sim-us-central1-it \
+--machine-type=e2-standard-2 \
+--image-family=debian-11 \
+--image-project=debian-cloud \
+--boot-disk-size=10GB \
+--network-interface=network=plat-g-w-sccp-us-central1,subnet=default,private-network-ip=10.1.1.2/24 \
+--metadata=startup-script-url=gs://plat-g-data/aboot.txt \
+--service-account=gplatsa@plat-g-w-sccp.iam.gserviceaccount.com \
+--region=us-central1 \
+--source-instance-zone=us-central1 \
+--project=plat-g-w-sccp \
+--tags=attack,internet
+ gcloud compute instance-templates create vic-sim-us-central1-it \
+--machine-type=e2-standard-2 \
+--image-family=debian-11 \
+--image-project=debian-cloud \
+--boot-disk-size=10GB \
+--network-interface=network=plat-g-w-sccp-us-central1,subnet=default,private-network-ip=10.1.1.3/24,address=none \
+--metadata=startup-script-url=gs://plat-g-data/vboot.txt \
+--service-account=gplatsa@plat-g-w-sccp.iam.gserviceaccount.com \
+--region=us-central1 \
+--source-instance-zone=us-central1 \
+--project=plat-g-w-sccp \
+--tags=nointernet
+gcloud compute instance-templates create attack-sim-us-central1-it \
+--machine-type=e2-standard-2 \
+--image-family=debian-11 \
+--image-project=debian-cloud \
+--boot-disk-size=10GB \
+--network-interface=network=plat-g-wo-sccp-us-central1,subnet=default,private-network-ip=10.1.1.2/24 \
+--metadata=startup-script-url=gs://plat-g-data/aboot.txt \
+--service-account=gplatsa@plat-g-wo-sccp.iam.gserviceaccount.com \
+--region=us-central1 \
+--source-instance-zone=us-central1 \
+--project=plat-g-wo-sccp \
+--tags=attack,internet
+gcloud compute instance-templates create vic-sim-us-central1-it \
+--machine-type=e2-standard-2 \
+--image-family=debian-11 \
+--image-project=debian-cloud \
+--boot-disk-size=10GB \
+--network-interface=network=plat-g-wo-sccp-us-central1,subnet=default,private-network-ip=10.1.1.3/24,address=none \
+--metadata=startup-script-url=gs://plat-g-data/vboot.txt \
+--service-account=gplatsa@plat-g-wo-sccp.iam.gserviceaccount.com \
+--region=us-central1 \
+--source-instance-zone=us-central1 \
+--project=plat-g-wo-sccp \
+--tags=nointernet 
+gcloud compute instance-templates create attack-sim-us-east1-it \
+--machine-type=e2-standard-2 \
+--image-family=debian-11 \
+--image-project=debian-cloud \
+--boot-disk-size=10GB \
+--network-interface=network=plat-g-w-sccp-us-east1,subnet=default,private-network-ip=10.1.1.2/24 \
+--metadata=startup-script-url=gs://plat-g-data/aboot.txt \
+--service-account=gplatsa@plat-g-w-sccp.iam.gserviceaccount.com \
+--region=us-east1 \
+--source-instance-zone=us-east1 \
+--project=plat-g-w-sccp \
+--tags=attack,internet
+gcloud compute instance-templates create vic-sim-us-east1-it \
+--machine-type=e2-standard-2 \
+--image-family=debian-11 \
+--image-project=debian-cloud \
+--boot-disk-size=10GB \
+--network-interface=network=plat-g-w-sccp-us-east1,subnet=default,private-network-ip=10.1.1.3/24,address=none \
+--metadata=startup-script-url=gs://plat-g-data/vboot.txt \
+--service-account=gplatsa@plat-g-w-sccp.iam.gserviceaccount.com \
+--region=us-east1 \
+--source-instance-zone=us-east1 \
+--project=plat-g-w-sccp \
+--tags=nointernet
+gcloud compute instance-templates create attack-sim-us-east1-it \
+--machine-type=e2-standard-2 \
+--image-family=debian-11 \
+--image-project=debian-cloud \
+--boot-disk-size=10GB \
+--network-interface=network=plat-g-wo-sccp-us-east1,subnet=default,private-network-ip=10.1.1.2/24 \
+--metadata=startup-script-url=gs://plat-g-data/aboot.txt \
+--service-account=gplatsa@plat-g-wo-sccp.iam.gserviceaccount.com \
+--region=us-east1 \
+--source-instance-zone=us-east1 \
+--project=plat-g-wo-sccp \
+--tags=attack,internet
+gcloud compute instance-templates create vic-sim-us-east1-it \
+--machine-type=e2-standard-2 \
+--image-family=debian-11 \
+--image-project=debian-cloud \
+--boot-disk-size=10GB \
+--network-interface=network=plat-g-wo-sccp-us-east1,subnet=default,private-network-ip=10.1.1.3/24,address=none \
+--metadata=startup-script-url=gs://plat-g-data/vboot.txt \
+--service-account=gplatsa@plat-g-wo-sccp.iam.gserviceaccount.com \
+--region=us-east1 \
+--source-instance-zone=us-east1 \
+--project=plat-g-wo-sccp \
+--tags=nointernet 
+
+## Set schedule so that we only have stuff running for 30 minutes every 6h
+
+gcloud compute resource-policies create instance-schedule every-6-hours-30min \
+--region=africa-south1 \
+--vm-start-schedule='0 */6 * * *' \
+--vm-stop-schedule='30 */6 * * *' \
+--project=plat-g-wo-sccp \
+--timezone=America/Winnipeg
+
+gcloud compute resource-policies create instance-schedule every-6-hours-30min \
+--region=europe-west10 \
+--vm-start-schedule='0 */6 * * *' \
+--vm-stop-schedule='30 */6 * * *' \
+--project=plat-g-wo-sccp \
+--timezone=America/Winnipeg
+
+gcloud compute resource-policies create instance-schedule every-6-hours-30min \
+--region=us-central1 \
+--vm-start-schedule='0 */6 * * *' \
+--vm-stop-schedule='30 */6 * * *' \
+--project=plat-g-wo-sccp \
+--timezone=America/Winnipeg
+
+gcloud compute resource-policies create instance-schedule every-6-hours-30min \
+--region=us-east1 \
+--vm-start-schedule='0 */6 * * *' \
+--vm-stop-schedule='30 */6 * * *' \
+--project=plat-g-wo-sccp \
+--timezone=America/Winnipeg
+
+gcloud compute resource-policies create instance-schedule every-6-hours-30min \
+--region=africa-south1 \
+--vm-start-schedule='0 */6 * * *' \
+--vm-stop-schedule='30 */6 * * *' \
+--project=plat-g-w-sccp \
+--timezone=America/Winnipeg
+
+gcloud compute resource-policies create instance-schedule every-6-hours-30min \
+--region=europe-west10 \
+--vm-start-schedule='0 */6 * * *' \
+--vm-stop-schedule='30 */6 * * *' \
+--project=plat-g-w-sccp \
+--timezone=America/Winnipeg
+
+gcloud compute resource-policies create instance-schedule every-6-hours-30min \
+--region=us-central1 \
+--vm-start-schedule='0 */6 * * *' \
+--vm-stop-schedule='30 */6 * * *' \
+--project=plat-g-w-sccp \
+--timezone=America/Winnipeg
+
+gcloud compute resource-policies create instance-schedule every-6-hours-30min \
+--region=us-east1 \
+--vm-start-schedule='0 */6 * * *' \
+--vm-stop-schedule='30 */6 * * *' \
+--project=plat-g-w-sccp \
+--timezone=America/Winnipeg
+
+gcloud compute instances create vic-sim-us-east1-vm \
+--source-instance-template vic-sim-us-east1-it \
+--zone=us-east1-b
+gcloud compute instances add-resource-policies vic-sim-us-east1-vm \
+--resource-policies=every-6-hours-30min \
+--zone=us-east1-b
+gcloud compute instances create attack-sim-us-east1-vm \
+--source-instance-template vic-sim-us-east1-it \
+--zone=us-east1-b
+gcloud compute instances add-resource-policies attack-sim-us-east1-vm \
+--resource-policies=every-6-hours-30min \
+--zone=us-east1-b
+
+gcloud storage buckets create gs://plat-g-data --location=US --project=plat-g-wo-sccp
+gcloud storage buckets update gs://plat-g-data --clear-soft-delete --project=plat-g-data
+
+curl https://raw.githubusercontent.com/retep-dot-ca/plat-g/main/dns-exfil.txt > dns-exfil.txt | gsutil cp dns-exfil.txt gs://plat-g-data-store/dns-exfil.txt 
+curl https://raw.githubusercontent.com/retep-dot-ca/plat-g/main/aboot.sh > aboot.sh | gsutil cp aboot.sh gs://plat-g-data-store/aboot.sh 
+curl https://raw.githubusercontent.com/retep-dot-ca/plat-g/main/vboot.sh > vboot.sh | gsutil cp vboot.sh gs://plat-g-data-store/vboot.sh 
+curl https://raw.githubusercontent.com/retep-dot-ca/plat-g/main/limitedwordlist.txt > limitedwordlist.txt | gsutil cp limitedwordlist.txt gs://plat-g-data-store/limitedwordlist.txt 
+
+# Budget was manually set can set via 
+#gcloud billing budgets create --billing-account=123 --display-name="BUDGET1" --budget-amount=100.75USD --threshold-rule=percent=0.50 --threshold-rule=percent=0.75,basis=forecasted-spend
+
+## Generate DNS Logging
+gcloud dns policies create enable-dns-logging \
+--enable-logging \
+--description="Enable DNS Logging" \
+--networks=internet-europe-west10 \
+--project=plat-g-wo-sccp
+gcloud dns policies create enable-dns-logging \
+--enable-logging \
+--description="Enable DNS Logging" \
+--networks=internet-africa-south1 \
+--project=plat-g-wo-sccp
+gcloud dns policies create enable-dns-logging \
+--enable-logging \
+--description="Enable DNS Logging" \
+--networks=internet-us-east1 \
+--project=plat-g-wo-sccp
+gcloud dns policies create enable-dns-logging \
+--enable-logging \
+--description="Enable DNS Logging" \
+--networks=internet-us-central1 \
+--project=plat-g-wo-sccp
+gcloud dns policies create enable-dns-logging-europe-west10 \
+--enable-logging \
+--description="Enable DNS Logging" \
+--networks=internet-europe-west10 \
+--project=plat-g-w-sccp
+gcloud dns policies create enable-dns-logging-africa-south1 \
+--enable-logging \
+--description="Enable DNS Logging" \
+--networks=internet-africa-south1 \
+--project=plat-g-w-sccp
+gcloud dns policies create enable-dns-logging \
+--enable-logging \
+--description="Enable DNS Logging" \
+--networks=internet-us-east1 \
+--project=plat-g-w-sccp
+gcloud dns policies create enable-dns-logging-us-central1 \
+--enable-logging \
+--description="Enable DNS Logging" \
+--networks=internet-us-central1 \
+--project=plat-g-w-sccp \
+--enable-logging
